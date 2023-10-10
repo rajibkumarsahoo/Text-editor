@@ -1,0 +1,6 @@
+Title: Arbitrage Strategy in Stocks and Futures
+1. Implemented Interest rate arbitrage strategy in stocks and futures in R as well as in a simulated exchange.
+2. Simulated Passive-aggressive strategies on high frequency market data. 
+3. Analyzed the strategy using KPIs like turnover,mean gross, delta, pnl, sharpe ratio, transaction cost, churning  to optimize reward-to-risk ratio.
+4. Explored Statistical arbitrage and concepts such as pair trading, mean reverting and hedge ratio. 
+5. Result: Developed an arbitrage strategy that outperforms the risk free interest rate of the country.

@@ -1,3 +1,7 @@
+#define _DEFAULT_SOURCE 
+#define _BSD_SOURCE
+#define _GNU_SOURCE
+
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -14,7 +18,7 @@
 
 
 
-#define _DEFAULT_SOURCE
+
 #define _BSD_SOURCE
 #define _GNU_SOURCE
 #define CTRL_KEY(k) ((k) & 0x1f)
@@ -22,15 +26,15 @@
 #define KILO_TAB_STOP 8
 
 
-typedef struct erow {
+typedef struct erow {  
   int size;
   int rsize;
   char *chars;
   char *render;
 } erow;
 
-struct editorConfig{
-    int cx, cy;
+struct editorConfig{// This structure stores the configuration of the editor
+    int cx, cy; // the horizontal coordinate of the cursor, the vertical coordiante of the cursor
     int rx;
     int rowoff;
     int coloff;
@@ -39,23 +43,23 @@ struct editorConfig{
     int numrows;
     erow *row;
     char *filename;
+    int dirty;
     char statusmsg[80];
     time_t statusmsg_time;
-    struct termios t_o;  
+    struct termios t_o;   // the original configuration of the terminal 
 };
 
-struct editorConfig E;
-// E.screenrows = 24;
+struct editorConfig E; // Defining a global struct for the configuration of the terminal
+// E.screenrows = 24; // 
 // E.screencols = 80;
 
 
-void editorSetStatusMessage(const char *fmt, ...);
+void editorSetStatusMessage(const char *fmt, ...);// to show the status of the editor
 
 
 
-enum editorKey {
-  BACKSPACE = 127,
-
+enum editorKey { // different keys that we will be adding functionality for 
+  BACKSPACE = 127,    
   ARROW_LEFT = 1000,
   ARROW_RIGHT ,
   ARROW_UP ,
@@ -68,36 +72,43 @@ enum editorKey {
 };
 
 
-void editorMoveCursor(int key) {
+void MoverCursor(int key) {// Move the cursor in the editor
   erow *row = (E.cy >= E.numrows) ? NULL : &E.row[E.cy];
-  switch (key) {
-    case ARROW_LEFT:
+  if(key==ARROW_LEFT){
       if (E.cx != 0) {
         E.cx--;
       } else if (E.cy > 0) {
         E.cy--;
         E.cx = E.row[E.cy].size;
       }
-      break;
-    case ARROW_RIGHT:
-      if (row && E.cx < row->size) {
+
+  }
+ else if(key==ARROW_RIGHT){
+        if (row && E.cx < row->size) {
         E.cx++;
       } else if (row && E.cx == row->size) {
         E.cy++;
         E.cx = 0;
       }
-      break;
-    case ARROW_UP:
-      if (E.cy != 0) {
+  
+
+ }
+ else if(key==ARROW_UP){
+        if (E.cy != 0) {
         E.cy--;
       }
-      break;
-    case ARROW_DOWN:
-      if (E.cy < E.numrows) {
+ 
+
+ }
+ else if(key==ARROW_DOWN){
+        if (E.cy < E.numrows) {
         E.cy++;
       }
-      break;
-  }
+
+
+ }
+
+
   row = (E.cy >= E.numrows) ? NULL : &E.row[E.cy];
   int rowlen = row ? row->size : 0;
   if (E.cx > rowlen) {
@@ -106,7 +117,7 @@ void editorMoveCursor(int key) {
 }
 
 
-void die(const char *g) {
+void die(const char *g) {// When the code dies to show the error
   write(STDOUT_FILENO, "\x1b[2J", 4);
   write(STDOUT_FILENO,"\x1b[H",3);    
   perror(g);
@@ -128,33 +139,27 @@ int editorReadKey() {//editor read key
             if (seq[1] >= '0' && seq[1] <= '9') {
         if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
         if (seq[2] == '~') {
-          switch (seq[1]) {
-            case '1': return HOME_KEY;
-            case '3': return DEL_KEY;
-            case '4': return END_KEY;
-            case '5': return PAGE_UP;
-            case '6': return PAGE_DOWN;
-            case '7':return HOME_KEY;
-            case '8':return END_KEY;
-          }
+          if(seq[1]=='1')return HOME_KEY;
+          else if(seq[1]=='3')return DEL_KEY;
+          else if(seq[1]=='4')return END_KEY;
+          else if(seq[1]=='5')return PAGE_UP;
+          else if(seq[1]=='6')return PAGE_DOWN;
+          else if(seq[1]=='7')return HOME_KEY;
+          else if(seq[1]=='8')return END_KEY;
         }
       } 
       else {
-      switch (seq[1]) {
-        case 'A': return ARROW_UP;
-        case 'B': return ARROW_DOWN;
-        case 'C': return ARROW_RIGHT;
-        case 'D': return ARROW_LEFT;
-        case 'H': return HOME_KEY;
-        case 'F': return END_KEY;
-      }
+        if(seq[1]=='A')return ARROW_UP;
+        else if(seq[1]=='B')return ARROW_DOWN;
+        else if(seq[1]=='C')return ARROW_RIGHT;
+        else if(seq[1]=='D')return ARROW_LEFT;
+        else if(seq[1]=='H')return HOME_KEY;
+        else if(seq[1]=='F')return END_KEY;
     }
     }
     else if (seq[0] == 'O') {
-      switch (seq[1]) {
-        case 'H': return HOME_KEY;
-        case 'F': return END_KEY;
-      }
+      if(seq[1]=='H')return HOME_KEY;
+      else if(seq[1]=='F')return END_KEY;
     }
     return '\x1b';
   } else {
@@ -162,7 +167,7 @@ int editorReadKey() {//editor read key
   }
 }
 
-int getCursorPosition(int *rows, int *cols) {
+int getCursorPosition(int *rows, int *cols) {// get the row and column for the cursor position
   char buf[32];
   unsigned int i = 0;
   if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4) return -1;
@@ -177,7 +182,7 @@ int getCursorPosition(int *rows, int *cols) {
   return 0;
 }
 
-int getWindowSize(int *rows, int *cols) {
+int getWindowSize(int *rows, int *cols) { // getting the total rows and total columns for the window
   struct winsize ws;
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
     if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) return -1;
@@ -280,6 +285,7 @@ char *editorRowsToString(int *buflen) {
   }
   return buf;
 }
+
 
 void editorOpen(char *filename) {
   free(E.filename);
@@ -423,7 +429,7 @@ void editorDrawStatusBar(struct abuf *ab) {
 }
 
 
-void editorDrawMessageBar(struct abuf *ab) {
+void editorDrawMessageBar(struct abuf *ab) { 
   abAppend(ab, "\x1b[K", 3);
   int msglen = strlen(E.statusmsg);
   if (msglen > E.screencols) msglen = E.screencols;
@@ -439,7 +445,7 @@ void initEditor(){
     E.rx = 0;
     E.rowoff = 0;
     E.coloff = 0;
-
+    E.dirty=0;
     E.numrows = 0;
     E.row = NULL;
     E.filename = NULL;
@@ -518,7 +524,7 @@ void editorSetStatusMessage(const char *fmt, ...) {
 
 
 /*** input ***/
-void editorProcessKeypress() {
+void Process_keypress() {
   int c = editorReadKey();
   switch (c) {
     case '\r':
@@ -555,14 +561,14 @@ void editorProcessKeypress() {
         }
         int times = E.screenrows;
         while (times--)
-          editorMoveCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+          MoverCursor(c == PAGE_UP ? ARROW_UP : ARROW_DOWN);
       }
       break;
     case ARROW_UP:
     case ARROW_DOWN:
     case ARROW_LEFT:
     case ARROW_RIGHT:
-      editorMoveCursor(c);
+      MoverCursor(c);
       break;
     case CTRL_KEY('l'):
     case '\x1b':
@@ -574,19 +580,20 @@ void editorProcessKeypress() {
 }
 
 
+
 int main(int argc, char *argv[]) {
-  raw_enable();
-  initEditor();
-  if (argc >= 2) {
+  raw_enable(); // enabling the raw mode of the terminal 
+  initEditor(); // Initialization of the editor structure
+  if (argc >= 2) {  // to open a file 
     editorOpen(argv[1]);
   }
 
-  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit");
+  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit");// editor status at the start  
 
   
   while(1){
   editorRefreshScreen(); 
-  editorProcessKeypress();
+  Process_keypress();// to process the keypresses
   }
   return 0;
 }
