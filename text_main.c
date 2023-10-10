@@ -27,23 +27,33 @@ enum editorKey {
   ARROW_LEFT = 1000,
   ARROW_RIGHT ,
   ARROW_UP ,
-  ARROW_DOWN
+  ARROW_DOWN,
+  PAGE_UP,
+  PAGE_DOWN
 };
 
 
 void editorMoveCursor(int key) {
   switch (key) {
     case ARROW_LEFT:
-      E.cx--;
+      if(E.cx !=0){
+        E.cx--;
+      } 
       break;
     case ARROW_RIGHT:
-      E.cx++;
+      if(E.cx != E.total_cols-1){
+        E.cx++;
+      }  
       break;
     case ARROW_UP:
-      E.cy--;
+      if(E.cy != 0){
+        E.cy--;
+      }
       break;
     case ARROW_DOWN:
+    if(E.cy != E.total_rows-1){
       E.cy++;
+    }
       break;
   }
 }
@@ -68,12 +78,23 @@ int rk_editor() {//editor read key
     if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
     if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
     if (seq[0] == '[') {
+            if (seq[1] >= '0' && seq[1] <= '9') {
+        if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
+        if (seq[2] == '~') {
+          switch (seq[1]) {
+            case '5': return PAGE_UP;
+            case '6': return PAGE_DOWN;
+          }
+        }
+      } 
+      else {
       switch (seq[1]) {
         case 'A': return ARROW_UP;
         case 'B': return ARROW_DOWN;
         case 'C': return ARROW_RIGHT;
         case 'D': return ARROW_LEFT;
       }
+    }
     }
     return '\x1b';
   } else {
@@ -232,6 +253,16 @@ void k_p_e() {//editorprocesskeyword
       write(STDOUT_FILENO,"\x1b[H",3);
       exit(0);
       break;
+
+    case PAGE_UP:
+    case PAGE_DOWN:
+    {
+      int time=E.total_rows;
+      while(time--){
+        editorMoveCursor(c==PAGE_UP ? ARROW_UP : ARROW_DOWN);
+      }
+    }
+    break;  
 
     case ARROW_UP:
     case ARROW_DOWN:
