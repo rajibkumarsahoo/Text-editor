@@ -54,7 +54,7 @@ struct editorConfig E; // Defining a global struct for the configuration of the 
 // E.screencols = 80;
 
 
-void editorSetStatusMessage(const char *fmt, ...);// to show the status of the editor
+void Status_of_editor(const char *fmt, ...);// to show the status of the editor
 
 
 
@@ -139,20 +139,20 @@ int editorReadKey() {//editor read key
             if (seq[1] >= '0' && seq[1] <= '9') {
         if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
         if (seq[2] == '~') {
-          if(seq[1]=='1')return HOME_KEY;
+          if(seq[1]=='1')return HOME_KEY;// various escape sequences for various keys // to go to extreme left
           else if(seq[1]=='3')return DEL_KEY;
-          else if(seq[1]=='4')return END_KEY;
-          else if(seq[1]=='5')return PAGE_UP;
-          else if(seq[1]=='6')return PAGE_DOWN;
+          else if(seq[1]=='4')return END_KEY;// to go to the extreme right
+          else if(seq[1]=='5')return PAGE_UP;// to go to extreme top
+          else if(seq[1]=='6')return PAGE_DOWN;// to go to exreme bottom
           else if(seq[1]=='7')return HOME_KEY;
           else if(seq[1]=='8')return END_KEY;
         }
       } 
       else {
-        if(seq[1]=='A')return ARROW_UP;
-        else if(seq[1]=='B')return ARROW_DOWN;
-        else if(seq[1]=='C')return ARROW_RIGHT;
-        else if(seq[1]=='D')return ARROW_LEFT;
+        if(seq[1]=='A')return ARROW_UP;// for cursor arrow up
+        else if(seq[1]=='B')return ARROW_DOWN;// for cursor arrow down
+        else if(seq[1]=='C')return ARROW_RIGHT;// for cursor arrow right
+        else if(seq[1]=='D')return ARROW_LEFT;// for cursor arrow left
         else if(seq[1]=='H')return HOME_KEY;
         else if(seq[1]=='F')return END_KEY;
     }
@@ -317,14 +317,14 @@ void editorSave() {
       if (write(fd, buf, len) == len) {
         close(fd);
         free(buf);
-        editorSetStatusMessage("%d bytes written to disk", len);
+        Status_of_editor("%d bytes written to disk", len);
         return;
       }
     }
     close(fd);
   }
   free(buf);
-  editorSetStatusMessage("Can't save! I/O error: %s", strerror(errno));
+  Status_of_editor("Can't save! I/O error: %s", strerror(errno));
 }
 
 
@@ -379,7 +379,7 @@ void editorDrawRows(struct abuf *ab){
       if (E.numrows == 0 && y == E.screenrows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
-          "Kilo editor -- version %s", KILO_VERSION);
+          "Text editor -- version %s", KILO_VERSION);
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
@@ -514,7 +514,7 @@ void editorRefreshScreen() {// editor refresh screen
 }
 
 
-void editorSetStatusMessage(const char *fmt, ...) {
+void Status_of_editor(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
@@ -588,7 +588,7 @@ int main(int argc, char *argv[]) {
     editorOpen(argv[1]);
   }
 
-  editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit");// editor status at the start  
+  Status_of_editor("HELP: Ctrl-S = save | Ctrl-Q = quit");// editor status at the start  
 
   
   while(1){
