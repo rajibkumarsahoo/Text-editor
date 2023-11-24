@@ -48,7 +48,7 @@ Ctrl+Q: Quit the editor
  UI : By 10 Oct 23
  Editing Features : 05 Nov 23
  Completion : 15 Nov 23
-# Putting Terminal into Raw mode
+# Overview
 At the very outset we need to first read the keypresses from the user. In order to do this we include unistd.h header file and then utilise the read() system function. The read() will receive input from user through standard input devices like keyboard @1 byte each time during keypress. A while loop will keep taking inputs from the user and pass it to a variable until there are no more bytes to read. The EOF will be understood  by read() when there is no input or we give CTRL+D command. CTRL+C command terminates the program immediately.
 Instead of having CTRL+C to quit the program we try and put q+ENTER to signal end of file to read(). In order to achieve this we put AND condition in while loop so that the read() understands EOF when the variable encounters q and then we press ENTER to come out of the program.
 Next in order to convert our Nano text editor into Raw mode we need to disable the Display/ECHO feature of the terminal. We will be using tcgetattr() system function to store the attributes of the terminal before it is subjected to raw mode and tcgetattr() system function to push those attributes back to terminal when we quit Raw mode of the terminal. termios.h header file contains the tcgetattr(),tcsetattr(),struct termios,ECHO and TCSAFLUSH.
