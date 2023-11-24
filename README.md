@@ -40,6 +40,9 @@ Open and Save:The functionality to open a new file/ existing file and save a fil
 Ctrl+S: To save the file
 Ctrl+C: To Copy the text
 Ctrl+V: To Print the text
+Ctrl+F: Search a string
+Ctrl+R: Search and replace a string
+Ctrl+Q: Quit the editor
 
 # Timeline and Estimation of Time:
  UI : By 10 Oct 23
