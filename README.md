@@ -60,3 +60,5 @@ Next we enable CTRL+Q to quit the program instead of pressing ENTER after q. Thi
 between q and the CTRL.
 Now we will try and simplify the main() with the rk_editor() and k_p_e() functions for low-level keypress reading and mapping keypress to editor operations respectively.
 Lastly we clear the screen to provide editor's user interface after each keypress.This is achieved by r_e_s() function. ANSI escape code sequence instrusts the terminal to clear its screen.
+
+Post putting the terminal into raw mode we create a datatype for storing a row of text in our editor, store multiple lines, enable vertical and horizontal scrolling, improve tabs and cursor operations, page up and down operations and finally establishing a status bar before moving onto text-editing features. Then we enable text editing features like inserting ordinary characters, preventing insertion of special characters, enabling backspacing and ENTER operations. Then we enabled functions like quit confirmation, string search, search and replace string operations.  
